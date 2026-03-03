@@ -1,18 +1,44 @@
 package com.khanabooklite.app.domain.manager
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import android.content.Context
+import android.content.SharedPreferences
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+private const val PREFS_NAME = "session_prefs"
+private const val KEY_LAST_INTERACTION = "last_interaction_time"
+private const val SESSION_CHECK_INTERVAL_MS = 60_000L // check every 60 seconds
 
 @Singleton
-class SessionManager @Inject constructor() {
-    private var lastInteractionTime: Long = System.currentTimeMillis()
+class SessionManager @Inject constructor(@ApplicationContext private val context: Context) {
+    private val prefs: SharedPreferences =
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
     private var timeoutMinutes: Int = 30
 
     private val _isSessionExpired = MutableStateFlow(false)
     val isSessionExpired: StateFlow<Boolean> = _isSessionExpired
+
+    // Background scope for periodic session checks
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    init {
+        startPeriodicCheck()
+    }
+
+    /** Persist last interaction time so it survives process kills */
+    private var lastInteractionTime: Long
+        get() = prefs.getLong(KEY_LAST_INTERACTION, System.currentTimeMillis())
+        set(value) = prefs.edit().putLong(KEY_LAST_INTERACTION, value).apply()
 
     fun updateTimeout(minutes: Int) {
         timeoutMinutes = minutes
@@ -34,9 +60,19 @@ class SessionManager @Inject constructor() {
             _isSessionExpired.value = true
         }
     }
-    
+
     fun resetSession() {
         _isSessionExpired.value = false
         lastInteractionTime = System.currentTimeMillis()
+    }
+
+    /** Automatically checks session expiry in the background every minute */
+    private fun startPeriodicCheck() {
+        scope.launch {
+            while (true) {
+                delay(SESSION_CHECK_INTERVAL_MS)
+                checkSession()
+            }
+        }
     }
 }

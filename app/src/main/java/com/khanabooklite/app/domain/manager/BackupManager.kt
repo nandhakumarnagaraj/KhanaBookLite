@@ -1,9 +1,12 @@
 package com.khanabooklite.app.domain.manager
 
 import android.content.Context
+import android.util.Log
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+
+private const val TAG = "BackupManager"
 
 class BackupManager(private val context: Context) {
 
@@ -13,16 +16,15 @@ class BackupManager(private val context: Context) {
             if (dbFile.exists()) {
                 val destFile = File(exportDir, "${dbName}_backup_${System.currentTimeMillis()}.db")
                 FileInputStream(dbFile).use { input ->
-                    FileOutputStream(destFile).use { output ->
-                        input.copyTo(output)
-                    }
+                    FileOutputStream(destFile).use { output -> input.copyTo(output) }
                 }
                 true
             } else {
+                Log.w(TAG, "Database file not found: $dbName")
                 false
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to export database", e)
             false
         }
     }
@@ -32,16 +34,15 @@ class BackupManager(private val context: Context) {
             if (backupFile.exists()) {
                 val dbFile = context.getDatabasePath(dbName)
                 FileInputStream(backupFile).use { input ->
-                    FileOutputStream(dbFile).use { output ->
-                        input.copyTo(output)
-                    }
+                    FileOutputStream(dbFile).use { output -> input.copyTo(output) }
                 }
                 true
             } else {
+                Log.w(TAG, "Backup file not found: ${backupFile.path}")
                 false
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to import database", e)
             false
         }
     }

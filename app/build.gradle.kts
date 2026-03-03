@@ -34,6 +34,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         // ── Meta / WhatsApp API Config ────────────────────────────────────────
+        // ⚠️  SECURITY WARNING: BuildConfig fields are compiled into the APK binary
+        // and are extractable via apktool or jadx. The META_ACCESS_TOKEN should
+        // ideally be held on a backend server (e.g. Firebase Function / Cloud Run)
+        // that proxies OTP requests. Until a backend is available, ensure you
+        // rotate this token regularly and restrict its API permissions.
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
@@ -51,11 +56,22 @@ android {
 
     signingConfigs {
         create("release") {
-            // Placeholder: In a real prod env, these would be in environment variables or a local.properties
-            storeFile = file("release-key.jks")
-            storePassword = "password"
-            keyAlias = "keyAlias"
-            keyPassword = "password"
+            // ✅ Credentials read from local.properties — never hardcoded
+            // Add to local.properties:
+            //   SIGNING_STORE_FILE=release-key.jks
+            //   SIGNING_STORE_PASSWORD=your_store_password
+            //   SIGNING_KEY_ALIAS=your_key_alias
+            //   SIGNING_KEY_PASSWORD=your_key_password
+            val localProperties = Properties()
+            val localPropertiesFile = rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                localProperties.load(localPropertiesFile.inputStream())
+            }
+            val storeFilePath = localProperties.getProperty("SIGNING_STORE_FILE") ?: "release-key.jks"
+            storeFile = file(storeFilePath)
+            storePassword = localProperties.getProperty("SIGNING_STORE_PASSWORD") ?: ""
+            keyAlias = localProperties.getProperty("SIGNING_KEY_ALIAS") ?: ""
+            keyPassword = localProperties.getProperty("SIGNING_KEY_PASSWORD") ?: ""
         }
     }
 

@@ -1,21 +1,21 @@
 package com.khanabooklite.app
 
 import android.app.Application
+import android.util.Log
 import com.khanabooklite.app.data.local.DatabaseInitializer
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltAndroidApp
 class KhanaBookApplication : Application() {
 
-    @Inject
-    lateinit var databaseInitializer: DatabaseInitializer
+    @Inject lateinit var databaseInitializer: DatabaseInitializer
 
     override fun onCreate() {
         super.onCreate()
-        
+
         // Initialize sample data on startup
         MainScope().launch {
             try {
@@ -23,7 +23,7 @@ class KhanaBookApplication : Application() {
                     databaseInitializer.initialize()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("KhanaBookApp", "Failed to initialize database", e)
             }
         }
     }

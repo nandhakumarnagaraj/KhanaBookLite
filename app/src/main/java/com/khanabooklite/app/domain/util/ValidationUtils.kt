@@ -21,8 +21,15 @@ fun isValidName(name: String): Boolean {
 }
 
 fun isValidPassword(password: String): Boolean {
-    return password.length >= 6
+    if (password.length < 8) return false
+    val hasUpper = password.any { it.isUpperCase() }
+    val hasDigit = password.any { it.isDigit() }
+    val hasSpecial = password.any { !it.isLetterOrDigit() }
+    return hasUpper && hasDigit && hasSpecial
 }
+
+fun passwordStrengthMessage(): String =
+    "Password must be at least 8 characters and contain uppercase, digit, and special character"
 
 fun isValidOtp(otp: String): Boolean {
     return otp.length == 6 && otp.all { it.isDigit() }
