@@ -1,0 +1,42 @@
+package com.khanabooklite.app.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.khanabooklite.app.data.local.entity.BillEntity
+import com.khanabooklite.app.data.repository.BillRepository
+import com.khanabooklite.app.domain.manager.OrderIdManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val billRepository: BillRepository
+) : ViewModel() {
+
+    private val today = OrderIdManager.getTodayString()
+    private val startOfDay = "$today 00:00:00"
+    private val endOfDay = "$today 23:59:59"
+
+    val todayStats: StateFlow<HomeStats> = billRepository.getBillsByDateRange(startOfDay, endOfDay)
+        .map { bills ->
+            val completedBills = bills.filter { it.paymentStatus == "success" }
+            HomeStats(
+                orderCount = completedBills.size,
+                revenue = completedBills.sumOf { it.totalAmount },
+                customerCount = completedBills.mapNotNull { it.customerWhatsapp }.distinct().size
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = HomeStats()
+        )
+
+    data class HomeStats(
+        val orderCount: Int = 0,
+        val revenue: Double = 0.0,
+        val customerCount: Int = 0
+    )
+}
