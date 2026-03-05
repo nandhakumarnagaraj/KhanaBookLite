@@ -1,0 +1,60 @@
+﻿package com.khanabook.lite.pos.data.repository
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
+import com.khanabook.lite.pos.data.local.dao.BillDao
+import com.khanabook.lite.pos.data.local.entity.BillEntity
+import com.khanabook.lite.pos.data.local.entity.BillItemEntity
+import com.khanabook.lite.pos.data.local.entity.BillPaymentEntity
+import com.khanabook.lite.pos.data.local.relation.BillWithItems
+import kotlinx.coroutines.flow.Flow
+
+class BillRepository(private val billDao: BillDao) {
+
+    suspend fun insertFullBill(bill: BillEntity, items: List<BillItemEntity>, payments: List<BillPaymentEntity>) {
+        billDao.insertFullBill(bill, items, payments)
+    }
+
+    suspend fun getBillById(id: Int): BillEntity? {
+        return billDao.getBillById(id)
+    }
+
+    suspend fun getBillWithItemsById(id: Int): BillWithItems? {
+        return billDao.getBillWithItemsById(id)
+    }
+
+    suspend fun getBillWithItemsByLifetimeId(id: Int): BillWithItems? {
+        return billDao.getBillWithItemsByLifetimeId(id)
+    }
+
+    suspend fun getBillByDailyIdAndDate(displayId: String, datePrefix: String): BillEntity? {
+        return billDao.getBillByDailyIdAndDate(displayId, datePrefix)
+    }
+
+    suspend fun getBillByDailyIntIdAndDate(dailyId: Int, datePrefix: String): BillEntity? {
+        return billDao.getBillByDailyIntIdAndDate(dailyId, datePrefix)
+    }
+
+    fun getDraftBills(): Flow<List<BillEntity>> {
+        return billDao.getDraftBills()
+    }
+
+    suspend fun updateOrderStatus(id: Int, status: String) {
+        billDao.updateOrderStatus(id, status)
+    }
+
+    suspend fun updatePaymentMode(id: Int, mode: String) {
+        billDao.updatePaymentMode(id, mode)
+    }
+
+    suspend fun updatePaymentStatus(id: Int, status: String) {
+        billDao.updatePaymentStatus(id, status)
+    }
+
+    fun getBillsByDateRange(startDate: String, endDate: String): Flow<List<BillEntity>> {
+        return billDao.getBillsByDateRange(startDate, endDate)
+    }
+}
+
+

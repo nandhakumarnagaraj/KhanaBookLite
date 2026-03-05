@@ -1,12 +1,12 @@
-# ── KhanaBookLite ProGuard Rules ──────────────────────────────────────────────
+﻿# â”€â”€ KhanaBookLite ProGuard Rules â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Keep line numbers in stack traces for debuggability (hidden source file name)
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
-# ── Retrofit / Gson (data models must survive obfuscation) ────────────────────
+# â”€â”€ Retrofit / Gson (data models must survive obfuscation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Keep all fields in remote data classes for Gson deserialization
--keepclassmembers class com.khanabooklite.app.data.remote.** { *; }
+-keepclassmembers class com.khanabook.lite.pos.data.remote.** { *; }
 
 # Retain generic type info used by Retrofit/Gson
 -keepattributes Signature
@@ -24,26 +24,26 @@
 -dontwarn okio.**
 -keep class okhttp3.** { *; }
 
-# ── jBCrypt ───────────────────────────────────────────────────────────────────
+# â”€â”€ jBCrypt â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class org.mindrot.jbcrypt.** { *; }
 
-# ── SQLCipher ─────────────────────────────────────────────────────────────────
+# â”€â”€ SQLCipher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class net.sqlcipher.** { *; }
 -keep class net.sqlcipher.database.** { *; }
 
-# ── Room ──────────────────────────────────────────────────────────────────────
+# â”€â”€ Room â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep @androidx.room.Entity class *
 -keepclassmembers @androidx.room.Entity class * { *; }
 
-# ── Hilt / Dagger ────────────────────────────────────────────────────────────
+# â”€â”€ Hilt / Dagger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
 -keep @dagger.hilt.android.lifecycle.HiltViewModel class * { *; }
 
-# ── ZXing (QR code) ──────────────────────────────────────────────────────────
+# â”€â”€ ZXing (QR code) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class com.journeyapps.barcodescanner.** { *; }
 
-# ── Facebook SDK ──────────────────────────────────────────────────────────────
+# â”€â”€ Facebook SDK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 -keep class com.facebook.** { *; }
 -dontwarn com.facebook.**

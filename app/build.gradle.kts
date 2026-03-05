@@ -1,4 +1,4 @@
-
+﻿
 import java.util.Properties
 
 plugins {
@@ -21,11 +21,11 @@ java {
 }
 
 android {
-    namespace = "com.khanabooklite.app"
+    namespace = "com.khanabook.lite.pos"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.khanabooklite.app"
+        applicationId = "com.khanabook.lite.pos"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -33,8 +33,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
-        // ── Meta / WhatsApp API Config ────────────────────────────────────────
-        // ⚠️  SECURITY WARNING: BuildConfig fields are compiled into the APK binary
+        // â”€â”€ Meta / WhatsApp API Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // âš ï¸  SECURITY WARNING: BuildConfig fields are compiled into the APK binary
         // and are extractable via apktool or jadx. The META_ACCESS_TOKEN should
         // ideally be held on a backend server (e.g. Firebase Function / Cloud Run)
         // that proxies OTP requests. Until a backend is available, ensure you
@@ -56,7 +56,7 @@ android {
 
     signingConfigs {
         create("release") {
-            // ✅ Credentials read from local.properties — never hardcoded
+            // âœ… Credentials read from local.properties â€” never hardcoded
             // Add to local.properties:
             //   SIGNING_STORE_FILE=release-key.jks
             //   SIGNING_STORE_PASSWORD=your_store_password
@@ -144,7 +144,12 @@ dependencies {
 
     // Social Login
     implementation(libs.play.services.auth)
-    implementation(libs.facebook.login)
+
+
+    // Google Sign-In via Credential Manager (modern API)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // Networking
     implementation(libs.retrofit)
@@ -160,3 +165,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+

@@ -14,7 +14,7 @@ navigation = "2.8.5"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 google-auth = "21.2.0"
-facebook-auth = "17.0.0"
+
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 zxing = "4.3.0"
@@ -48,7 +48,7 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-auth" }
-facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebook-auth" }
+
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }

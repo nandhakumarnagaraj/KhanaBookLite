@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.DUMP" tools:node="remove" />
 
     <application
-        android:name="com.khanabooklite.app.KhanaBookApplication"
+        android:name="com.khanabook.lite.pos.KhanaBookApplication"
         android:allowBackup="false"
         android:networkSecurityConfig="@xml/network_security_config"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,7 +23,7 @@
         android:theme="@style/Theme.KhanaBookLite">
         
         <activity
-            android:name="com.khanabooklite.app.ui.MainActivity"
+            android:name="com.khanabook.lite.pos.ui.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.KhanaBookLite">
@@ -33,8 +33,7 @@
             </intent-filter>
         </activity>
 
-        <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled" android:value="false"/>
-        <meta-data android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled" android:value="false"/>
+
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -48,3 +47,5 @@
     </application>
 
 </manifest>
+
+
