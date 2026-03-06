@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.khanabook.lite.pos" />
-                  <option name="mobileSdkAppId" value="1:572447841356:android:4e7f035f712775690428e9" />
-                  <option name="projectId" value="khanabook-c735e" />
-                  <option name="projectNumber" value="572447841356" />
+                  <option name="mobileSdkAppId" value="1:836086274000:android:3f78339ef7eb074f4e8bd5" />
+                  <option name="projectId" value="new-khanabook-li" />
+                  <option name="projectNumber" value="836086274000" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

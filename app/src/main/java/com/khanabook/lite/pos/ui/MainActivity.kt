@@ -93,114 +93,30 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("new_bill") {
-                        val role = currentUser?.role
-                        val visibleTabs = NavigationUtils.getVisibleTabs(role)
-                        val currentSelectedIndex =
-                                visibleTabs.indexOfFirst { it.originalIndex == 0 }
-
-                        Scaffold(
-                                bottomBar = {
-                                    AppBottomBar(
-                                            visibleTabs = visibleTabs,
-                                            currentSelectedIndex =
-                                                    if (currentSelectedIndex != -1)
-                                                            currentSelectedIndex
-                                                    else 0,
-                                            onTabSelected = { index ->
-                                                val originalIndex = visibleTabs[index].originalIndex
-                                                navigateToMainTab(originalIndex)
-                                            }
-                                    )
-                                }
-                        ) { innerPadding ->
-                            NewBillScreen(
-                                    onBack = { navController.popBackStack() },
-                                    modifier = Modifier.fillMaxSize().padding(innerPadding)
-                            )
-                        }
+                        NewBillScreen(
+                                onBack = { navController.popBackStack() },
+                                modifier = Modifier.fillMaxSize()
+                        )
                     }
                     composable("search_bill") {
-                        val role = currentUser?.role
-                        val visibleTabs = NavigationUtils.getVisibleTabs(role)
-                        val currentSelectedIndex =
-                                visibleTabs.indexOfFirst { it.originalIndex == 0 }
-
-                        Scaffold(
-                                bottomBar = {
-                                    AppBottomBar(
-                                            visibleTabs = visibleTabs,
-                                            currentSelectedIndex =
-                                                    if (currentSelectedIndex != -1)
-                                                            currentSelectedIndex
-                                                    else 0,
-                                            onTabSelected = { index ->
-                                                val originalIndex = visibleTabs[index].originalIndex
-                                                navigateToMainTab(originalIndex)
-                                            }
-                                    )
-                                }
-                        ) { innerPadding ->
-                            SearchScreen(
-                                    title = "Search & Bill",
-                                    onBack = { navController.popBackStack() },
-                                    modifier = Modifier.fillMaxSize().padding(innerPadding)
-                            )
-                        }
+                        SearchScreen(
+                                title = "Search & Bill",
+                                onBack = { navController.popBackStack() },
+                                modifier = Modifier.fillMaxSize()
+                        )
                     }
                     composable("order_status") {
-                        val role = currentUser?.role
-                        val visibleTabs = NavigationUtils.getVisibleTabs(role)
-                        val currentSelectedIndex =
-                                visibleTabs.indexOfFirst { it.originalIndex == 0 }
-
-                        Scaffold(
-                                bottomBar = {
-                                    AppBottomBar(
-                                            visibleTabs = visibleTabs,
-                                            currentSelectedIndex =
-                                                    if (currentSelectedIndex != -1)
-                                                            currentSelectedIndex
-                                                    else 0,
-                                            onTabSelected = { index ->
-                                                val originalIndex = visibleTabs[index].originalIndex
-                                                navigateToMainTab(originalIndex)
-                                            }
-                                    )
-                                }
-                        ) { innerPadding ->
-                            SearchScreen(
-                                    title = "Check Order Status",
-                                    onBack = { navController.popBackStack() },
-                                    modifier = Modifier.fillMaxSize().padding(innerPadding)
-                            )
-                        }
+                        SearchScreen(
+                                title = "Check Order Status",
+                                onBack = { navController.popBackStack() },
+                                modifier = Modifier.fillMaxSize()
+                        )
                     }
                     composable("call_customer") {
-                        val role = currentUser?.role
-                        val visibleTabs = NavigationUtils.getVisibleTabs(role)
-                        val currentSelectedIndex =
-                                visibleTabs.indexOfFirst { it.originalIndex == 0 }
-
-                        Scaffold(
-                                bottomBar = {
-                                    AppBottomBar(
-                                            visibleTabs = visibleTabs,
-                                            currentSelectedIndex =
-                                                    if (currentSelectedIndex != -1)
-                                                            currentSelectedIndex
-                                                    else 0,
-                                            onTabSelected = { index ->
-                                                val originalIndex = visibleTabs[index].originalIndex
-                                                navigateToMainTab(originalIndex)
-                                            }
-                                    )
-                                }
-                        ) { innerPadding ->
-                            CallCustomerScreen(
-                                    onBack = { navController.popBackStack() },
-                                    modifier = Modifier.fillMaxSize().padding(innerPadding)
-                            )
-                        }
+                        CallCustomerScreen(
+                                onBack = { navController.popBackStack() },
+                                modifier = Modifier.fillMaxSize()
+                        )
                     }
                 }
             }
