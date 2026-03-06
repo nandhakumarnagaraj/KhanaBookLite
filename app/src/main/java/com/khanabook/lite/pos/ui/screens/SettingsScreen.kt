@@ -316,9 +316,10 @@ fun SettingsScreen(
 fun ConfigCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = ParchmentBG),
+            colors = CardDefaults.cardColors(containerColor = CardBG),
             shape = RoundedCornerShape(8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            border = androidx.compose.foundation.BorderStroke(1.dp, BorderGold.copy(alpha = 0.3f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) { Column(modifier = Modifier.padding(20.dp)) { content() } }
 }
 
@@ -348,10 +349,10 @@ fun BackupConfigView(viewModel: SettingsViewModel, onBack: () -> Unit) {
                 modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(12.dp))
-        Text("Export Database", color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("Export Database", color = TextLight, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Text(
                 "Save a backup of your menu, bills, and settings to your device storage.",
-                color = Color.DarkGray,
+                color = TextGold,
                 fontSize = 13.sp
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -384,13 +385,13 @@ fun BackupConfigView(viewModel: SettingsViewModel, onBack: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
         Text(
                 "Restore Database",
-                color = Color.Black,
+                color = TextLight,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
         )
         Text(
                 "Replace current data with a previously saved backup file (.db).",
-                color = Color.DarkGray,
+                color = TextGold,
                 fontSize = 13.sp
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -409,7 +410,7 @@ fun PreviewInvoiceView(profile: RestaurantProfileEntity?, onBack: () -> Unit) {
     var simulateGst by remember { mutableStateOf(profile?.gstEnabled ?: false) }
 
     ConfigCard {
-        Text("Preview Options", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text("Preview Options", color = TextLight, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
@@ -417,7 +418,7 @@ fun PreviewInvoiceView(profile: RestaurantProfileEntity?, onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Paper Size", color = Color.DarkGray, fontSize = 14.sp)
+            Text("Paper Size", color = TextGold, fontSize = 14.sp)
             Row {
                 FilterChip(
                         selected = previewPaperSize == "58mm",
@@ -440,7 +441,7 @@ fun PreviewInvoiceView(profile: RestaurantProfileEntity?, onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Simulate GST", color = Color.DarkGray, fontSize = 14.sp)
+            Text("Simulate GST", color = TextGold, fontSize = 14.sp)
             Switch(
                     checked = simulateGst,
                     onCheckedChange = { simulateGst = it },
@@ -1066,7 +1067,7 @@ fun PaymentToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) ->
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = Color.DarkGray, fontSize = 14.sp)
+        Text(label, color = TextGold, fontSize = 14.sp)
         Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
@@ -1196,7 +1197,7 @@ private fun PrinterConfigView(
             ) {
                 Text(
                         "Enable Bluetooth Printer",
-                        color = Color.DarkGray,
+                        color = TextGold,
                         fontWeight = FontWeight.Medium
                 )
                 Switch(
@@ -1258,32 +1259,32 @@ private fun PrinterConfigView(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                     "Connected Printer",
-                                    color = Color.Black,
+                                    color = TextLight,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 14.sp
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row {
-                            Text("Printer Name  ", color = Color.DarkGray, fontSize = 13.sp)
+                            Text("Printer Name  ", color = TextGold, fontSize = 13.sp)
                             Text(
                                     profile?.printerName ?: "Not Connected",
-                                    color = Color.Black,
+                                    color = TextLight,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium
                             )
                         }
                         Row {
-                            Text("MAC Address  ", color = Color.DarkGray, fontSize = 13.sp)
+                            Text("MAC Address  ", color = TextGold, fontSize = 13.sp)
                             Text(
                                     profile?.printerMac ?: "None",
-                                    color = Color.Black,
+                                    color = TextLight,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Medium
                             )
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Status: ", color = Color.DarkGray, fontSize = 13.sp)
+                            Text("Status: ", color = TextGold, fontSize = 13.sp)
                             val connected = profile?.printerMac != null
                             Box(
                                     modifier =
@@ -1337,11 +1338,11 @@ private fun PrinterConfigView(
                     RadioButton(
                             selected = paper58,
                             onClick = { paper58 = true },
-                            colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF5D4037))
+                            colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                     )
                     Text(
                             "58mm (Default small thermal printer)",
-                            color = Color.DarkGray,
+                            color = TextGold,
                             fontSize = 14.sp
                     )
                 }
@@ -1350,9 +1351,9 @@ private fun PrinterConfigView(
                 RadioButton(
                         selected = !paper58,
                         onClick = { paper58 = false },
-                        colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF5D4037))
+                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                 )
-                Text("80mm (Large billing printer)", color = Color.DarkGray, fontSize = 14.sp)
+                Text("80mm (Large billing printer)", color = TextGold, fontSize = 14.sp)
             }
         }
 
@@ -1690,9 +1691,9 @@ private fun PrinterOptionRow(label: String, checked: Boolean, onCheckedChange: (
         Checkbox(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
-                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5D4037))
+                colors = CheckboxDefaults.colors(checkedColor = PrimaryGold)
         )
-        Text(label, color = Color.DarkGray, fontSize = 14.sp)
+        Text(label, color = TextGold, fontSize = 14.sp)
     }
 }
 
@@ -1739,7 +1740,7 @@ private fun TaxConfigView(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("GST Number Available", color = Color.DarkGray, fontWeight = FontWeight.Medium)
+                Text("GST Number Available", color = TextGold, fontWeight = FontWeight.Medium)
                 Switch(
                         checked = gstEnabled,
                         onCheckedChange = { gstEnabled = it },
