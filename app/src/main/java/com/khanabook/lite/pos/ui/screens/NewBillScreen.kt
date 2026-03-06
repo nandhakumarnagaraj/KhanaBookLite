@@ -61,7 +61,27 @@ fun NewBillScreen(
         }
     }
 
-    Scaffold(containerColor = Color.Transparent) { paddingValues ->
+    Scaffold(
+        containerColor = DarkBrown1,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { 
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("New Bill", color = PrimaryGold, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        if (step == 1) {
+                            Text("Customer Details", color = TextGold, fontSize = 11.sp)
+                        }
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { if (step == 1) onBack() else if (step == 2) step = 1 else if (step == 3) step = 2 else step = 4 }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = PrimaryGold)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = DarkBrown1)
+            )
+        }
+    ) { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues).background(DarkBrown1)) {
             when (step) {
                 1 ->
@@ -70,7 +90,8 @@ fun NewBillScreen(
                                     billingViewModel.setCustomerInfo(name, whatsapp)
                                     step = 2
                                 },
-                                onBack = onBack
+                                onBack = onBack,
+                                hideHeader = true
                         )
                 2 ->
                         MenuSelectionStep(
@@ -79,7 +100,8 @@ fun NewBillScreen(
                                 onBack = { step = 1 },
                                 onProceedToPayment = { step = 3 },
                                 total = summary.total,
-                                itemCount = cartItems.sumOf { it.quantity }
+                                itemCount = cartItems.sumOf { it.quantity },
+                                hideHeader = true
                         )
                 3 ->
                         PaymentStep(
@@ -99,7 +121,7 @@ fun NewBillScreen(
 }
 
 @Composable
-fun CustomerInfoStep(onNext: (String, String) -> Unit, onBack: () -> Unit) {
+fun CustomerInfoStep(onNext: (String, String) -> Unit, onBack: () -> Unit, hideHeader: Boolean = false) {
     var name by remember { mutableStateOf("") }
     var whatsapp by remember { mutableStateOf("") }
 
@@ -114,26 +136,28 @@ fun CustomerInfoStep(onNext: (String, String) -> Unit, onBack: () -> Unit) {
                             .verticalScroll(rememberScrollState())
                             .padding(24.dp)
     ) {
-        // Back arrow + title aligned in the same row
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = PrimaryGold
-                )
+        if (!hideHeader) {
+            // Back arrow + title aligned in the same row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = PrimaryGold
+                    )
+                }
+                Column {
+                    Text(
+                            "New Bill",
+                            color = PrimaryGold,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                    )
+                    Text("Customer Details", color = TextGold, fontSize = 14.sp)
+                }
             }
-            Column {
-                Text(
-                        "New Bill",
-                        color = PrimaryGold,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                )
-                Text("Customer Details", color = TextGold, fontSize = 14.sp)
-            }
+            Spacer(modifier = Modifier.height(32.dp))
         }
-        Spacer(modifier = Modifier.height(32.dp))
 
         val showPhoneError = whatsapp.isNotEmpty() && !isValidPhone(whatsapp)
         OutlinedTextField(
@@ -210,7 +234,8 @@ fun MenuSelectionStep(
         onBack: () -> Unit,
         onProceedToPayment: () -> Unit,
         total: Double,
-        itemCount: Int
+        itemCount: Int,
+        hideHeader: Boolean = false
 ) {
     val categories by menuViewModel.categories.collectAsState()
     val items by menuViewModel.menuItems.collectAsState()
@@ -218,18 +243,20 @@ fun MenuSelectionStep(
     val selectedCategoryId by menuViewModel.selectedCategoryId.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    null,
-                    tint = PrimaryGold,
-                    modifier = Modifier.clickable { onBack() }
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text("New Bill", color = PrimaryGold, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        if (!hideHeader) {
+            Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        null,
+                        tint = PrimaryGold,
+                        modifier = Modifier.clickable { onBack() }
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("New Bill", color = PrimaryGold, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         if (categories.isNotEmpty()) {
@@ -848,51 +875,58 @@ fun SuccessStep(
                 onClick = {
                     try {
                         lastBill?.let { billWithItems ->
-                            val pdfGenerator =
-                                    com.khanabook.lite.pos.domain.manager.InvoicePDFGenerator(
-                                            context
-                                    )
-                            val pdfFile = pdfGenerator.generatePDF(billWithItems, profile)
-                            val pdfUri =
-                                    androidx.core.content.FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.provider",
-                                            pdfFile
-                                    )
-
                             val text =
                                     com.khanabook.lite.pos.domain.util.InvoiceFormatter
                                             .formatForWhatsApp(billWithItems, profile)
 
-                            val intent =
-                                    android.content.Intent(android.content.Intent.ACTION_SEND)
-                                            .apply {
-                                                type = "application/pdf"
-                                                putExtra(
-                                                        android.content.Intent.EXTRA_STREAM,
-                                                        pdfUri
-                                                )
-                                                putExtra(android.content.Intent.EXTRA_TEXT, text)
-                                                addFlags(
-                                                        android.content.Intent
-                                                                .FLAG_GRANT_READ_URI_PERMISSION
-                                                )
-                                            }
-                            context.startActivity(
-                                    android.content.Intent.createChooser(
-                                            intent,
-                                            "Share Invoice PDF"
-                                    )
-                            )
-                        }
-                                ?: run {
-                                    android.widget.Toast.makeText(
-                                                    context,
-                                                    "Bill details not available",
-                                                    android.widget.Toast.LENGTH_SHORT
+                            val phone = billWithItems.bill.customerWhatsapp
+                            if (phone.isNullOrBlank()) {
+                                // Fallback to generic share if no phone provided
+                                val intent =
+                                        android.content.Intent(android.content.Intent.ACTION_SEND)
+                                                .apply {
+                                                    type = "text/plain"
+                                                    putExtra(android.content.Intent.EXTRA_TEXT, text)
+                                                }
+                                context.startActivity(
+                                        android.content.Intent.createChooser(intent, "Share Invoice")
+                                )
+                            } else {
+                                // Target specific WhatsApp chat
+                                val formattedPhone =
+                                        if (phone.length == 10) "91$phone" else phone
+                                val url =
+                                        "https://api.whatsapp.com/send?phone=$formattedPhone&text=${android.net.Uri.encode(text)}"
+                                val intent =
+                                        android.content.Intent(android.content.Intent.ACTION_VIEW)
+                                                .apply {
+                                                    data = android.net.Uri.parse(url)
+                                                    `package` = "com.whatsapp"
+                                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    // WhatsApp not installed, fallback to generic
+                                    val fallbackIntent =
+                                            android.content.Intent(
+                                                            android.content.Intent.ACTION_SEND
+                                                    )
+                                                    .apply {
+                                                        type = "text/plain"
+                                                        putExtra(
+                                                                android.content.Intent.EXTRA_TEXT,
+                                                                text
+                                                        )
+                                                    }
+                                    context.startActivity(
+                                            android.content.Intent.createChooser(
+                                                    fallbackIntent,
+                                                    "Share Invoice"
                                             )
-                                            .show()
+                                    )
                                 }
+                            }
+                        }
                     } catch (e: Exception) {
                         android.widget.Toast.makeText(
                                         context,
@@ -909,7 +943,7 @@ fun SuccessStep(
         ) {
             Icon(Icons.Default.Share, null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Share PDF on WhatsApp", color = Color.White)
+            Text("Share on WhatsApp Chat", color = Color.White)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(

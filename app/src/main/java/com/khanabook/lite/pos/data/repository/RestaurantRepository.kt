@@ -1,8 +1,5 @@
 ﻿package com.khanabook.lite.pos.data.repository
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
 import com.khanabook.lite.pos.data.local.dao.RestaurantDao
 import com.khanabook.lite.pos.data.local.entity.RestaurantProfileEntity
 import kotlinx.coroutines.flow.Flow

@@ -531,8 +531,10 @@ fun MenuItemRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.DarkGray)
                 Text(
-                    text = if (variants.isNotEmpty()) "âœ¦ ${variants.size} Variants  â€º  Tap to manage"
-                           else "+ Add Variants",
+                    text = if (variants.isNotEmpty()) {
+                        val variantText = if (variants.size == 1) "Variant" else "Variants"
+                        "• ${variants.size} $variantText"
+                    } else "+ Add Variants",
                     fontSize = 11.sp,
                     color = Color(0xFF1976D2),
                     modifier = Modifier.clickable(onClick = onManageVariants)

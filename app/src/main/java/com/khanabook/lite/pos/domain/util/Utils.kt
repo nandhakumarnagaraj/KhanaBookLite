@@ -1,5 +1,8 @@
 ﻿package com.khanabook.lite.pos.domain.util
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.activity.ComponentActivity
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
@@ -34,6 +37,12 @@ object ValidationUtils {
     fun isValidPhone(phone: String): Boolean {
         return phone.length >= 10
     }
+}
+
+fun Context.findActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 

@@ -1076,6 +1076,7 @@ fun PaymentToggle(label: String, checked: Boolean, onCheckedChange: (Boolean) ->
     }
 }
 
+@android.annotation.SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PrinterConfigView(

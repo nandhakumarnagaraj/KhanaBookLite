@@ -1,8 +1,5 @@
 ﻿package com.khanabook.lite.pos.ui.viewmodel
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.khanabook.lite.pos.data.local.entity.CategoryEntity
@@ -50,9 +47,8 @@ class MenuViewModel @Inject constructor(
     }.flatMapLatest { (id, query) ->
         if (id != null) {
             menuRepository.getMenuWithVariantsByCategoryFlow(id).map { items ->
-                val filteredByStock = items.filter { it.menuItem.stockQuantity > 0 }
-                if (query.isBlank()) filteredByStock
-                else filteredByStock.filter { it.menuItem.name.contains(query, ignoreCase = true) }
+                if (query.isBlank()) items
+                else items.filter { it.menuItem.name.contains(query, ignoreCase = true) }
             }
         } else {
             flowOf(emptyList())
@@ -64,13 +60,14 @@ class MenuViewModel @Inject constructor(
         .map { items -> items.count { !it.isAvailable } }
         .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
-    val menuAddOnsCount: StateFlow<Int> = categories.map { list ->
-        // Priority based filtering for add-ons
-        list.count { cat -> 
-            val name = cat.name.lowercase()
-            name.contains("add-on") || name.contains("extra") || name.contains("side") || name.contains("combo")
+    val menuAddOnsCount: StateFlow<Int> = categories
+        .map { list ->
+            list.count { cat -> 
+                val name = cat.name.lowercase()
+                name.contains("add-on") || name.contains("extra") || name.contains("side") || name.contains("combo")
+            }
         }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, 0)
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query

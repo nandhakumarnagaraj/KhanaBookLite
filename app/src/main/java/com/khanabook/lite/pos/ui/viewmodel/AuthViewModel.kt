@@ -18,6 +18,7 @@ import com.khanabook.lite.pos.data.remote.*
 import com.khanabook.lite.pos.data.repository.RestaurantRepository
 import com.khanabook.lite.pos.data.repository.UserRepository
 import com.khanabook.lite.pos.domain.manager.AuthManager
+import com.khanabook.lite.pos.domain.util.findActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -292,16 +293,22 @@ constructor(
      * Real Google Sign-In using Credential Manager (modern Android API). Requires an Activity
      * context â€” pass LocalContext.current from the composable.
      */
-    fun loginWithGoogle(activityContext: Context) {
+    fun loginWithGoogle(context: Context) {
+        val activity = context.findActivity()
+        if (activity == null) {
+            _loginStatus.value = LoginResult.Error("Google Sign-In: activity context not found")
+            return
+        }
+
         viewModelScope.launch {
             try {
-                val credentialManager = CredentialManager.create(activityContext)
+                val credentialManager = CredentialManager.create(activity)
 
                 val googleIdOption =
                         GetGoogleIdOption.Builder()
                                 .setFilterByAuthorizedAccounts(false) // show all Google accounts
                                 .setServerClientId(
-                                        activityContext.getString(R.string.default_web_client_id)
+                                        activity.getString(R.string.default_web_client_id)
                                 )
                                 .setAutoSelectEnabled(false)
                                 .build()
@@ -311,7 +318,7 @@ constructor(
 
                 val result =
                         credentialManager.getCredential(
-                                context = activityContext,
+                                context = activity,
                                 request = request
                         )
 

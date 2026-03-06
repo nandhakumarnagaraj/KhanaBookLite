@@ -157,12 +157,12 @@ fun SearchScreen(
             val currentResult = result
             if (currentResult != null) {
                 Card(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                     colors = CardDefaults.cardColors(containerColor = DarkBrown2),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
+                    Column(modifier = Modifier.padding(16.dp).wrapContentHeight()) {
                         // Constant Header
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                             Column(modifier = Modifier.weight(1f)) {
@@ -190,7 +190,7 @@ fun SearchScreen(
                         // Scrollable Body (Items)
                         Column(
                             modifier = Modifier
-                                .weight(1f)
+                                .wrapContentHeight()
                                 .verticalScroll(rememberScrollState())
                         ) {
                             currentResult.items.forEach { item ->
@@ -216,44 +216,21 @@ fun SearchScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Payment Mode", color = TextGold, fontSize = 10.sp)
                                     
-                                    var payModeExpanded by remember { mutableStateOf(false) }
-                                    val enabledModes = remember(profile) { profile?.let { com.khanabook.lite.pos.domain.manager.PaymentModeManager.getEnabledModes(it) } ?: listOf(com.khanabook.lite.pos.domain.model.PaymentMode.CASH) }
-                                    
-                                    Box {
-                                        Surface(
-                                            onClick = { payModeExpanded = true },
-                                            color = Color.Black.copy(alpha = 0.2f),
-                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
-                                            border = androidx.compose.foundation.BorderStroke(0.5.dp, BorderGold.copy(alpha = 0.5f))
+                                    Surface(
+                                        color = Color.Black.copy(alpha = 0.2f),
+                                        shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
+                                        border = androidx.compose.foundation.BorderStroke(0.5.dp, BorderGold.copy(alpha = 0.5f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Row(
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    com.khanabook.lite.pos.domain.model.PaymentMode.fromDbValue(currentResult.bill.paymentMode).displayLabel,
-                                                    color = TextLight,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 12.sp
-                                                )
-                                                Icon(Icons.Default.ArrowDropDown, null, tint = PrimaryGold, modifier = Modifier.size(16.dp))
-                                            }
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = payModeExpanded,
-                                            onDismissRequest = { payModeExpanded = false },
-                                            modifier = Modifier.background(DarkBrown2)
-                                        ) {
-                                            enabledModes.forEach { mode ->
-                                                DropdownMenuItem(
-                                                    text = { Text(mode.displayLabel, color = TextLight) },
-                                                    onClick = {
-                                                        viewModel.updatePaymentMode(currentResult.bill.id, mode.dbValue)
-                                                        payModeExpanded = false
-                                                    }
-                                                )
-                                            }
+                                            Text(
+                                                com.khanabook.lite.pos.domain.model.PaymentMode.fromDbValue(currentResult.bill.paymentMode).displayLabel,
+                                                color = TextLight,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 12.sp
+                                            )
                                         }
                                     }
                                 }
