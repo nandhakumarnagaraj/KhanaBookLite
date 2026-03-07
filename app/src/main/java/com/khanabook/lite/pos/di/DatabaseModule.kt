@@ -90,7 +90,9 @@ object DatabaseModule {
                                         AppDatabase.MIGRATION_7_8,
                                         AppDatabase.MIGRATION_8_9,
                                         AppDatabase.MIGRATION_9_10,
-                                        AppDatabase.MIGRATION_10_11
+                                        AppDatabase.MIGRATION_10_11,
+                                        AppDatabase.MIGRATION_11_12,
+                                        AppDatabase.MIGRATION_12_13
                                 )
 
                 // Only allow destructive migration in debug builds to prevent accidental
@@ -114,7 +116,16 @@ object DatabaseModule {
 
         @Provides fun provideInventoryDao(database: AppDatabase) = database.inventoryDao()
 
-        @Provides @Singleton fun provideUserRepository(userDao: UserDao) = UserRepository(userDao)
+        @Provides fun provideRawMaterialDao(database: AppDatabase) = database.rawMaterialDao()
+
+        @Provides fun provideRecipeDao(database: AppDatabase) = database.recipeDao()
+
+        @Provides fun provideBatchDao(database: AppDatabase) = database.batchDao()
+
+        @Provides
+        @Singleton
+        fun provideUserRepository(userDao: UserDao, @ApplicationContext context: Context) = 
+            UserRepository(userDao, context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE))
 
         @Provides
         @Singleton
@@ -127,12 +138,41 @@ object DatabaseModule {
 
         @Provides @Singleton fun provideMenuRepository(menuDao: MenuDao) = MenuRepository(menuDao)
 
-        @Provides @Singleton fun provideBillRepository(billDao: BillDao) = BillRepository(billDao)
+        @Provides
+        @Singleton
+        fun provideBillRepository(
+                billDao: BillDao,
+                inventoryConsumptionManager: com.khanabook.lite.pos.domain.manager.InventoryConsumptionManager
+        ) = BillRepository(billDao, inventoryConsumptionManager)
 
         @Provides
         @Singleton
         fun provideInventoryRepository(inventoryDao: InventoryDao, menuDao: MenuDao) =
                 InventoryRepository(inventoryDao, menuDao)
+
+        @Provides
+        @Singleton
+        fun provideRawMaterialRepository(rawMaterialDao: RawMaterialDao) =
+                RawMaterialRepository(rawMaterialDao)
+
+        @Provides
+        @Singleton
+        fun provideRecipeRepository(recipeDao: RecipeDao) = RecipeRepository(recipeDao)
+
+        @Provides
+        @Singleton
+        fun provideBatchRepository(batchDao: BatchDao, rawMaterialDao: RawMaterialDao) =
+                BatchRepository(batchDao, rawMaterialDao)
+
+        @Provides
+        @Singleton
+        fun provideInventoryConsumptionManager(
+                recipeRepository: RecipeRepository,
+                batchRepository: BatchRepository
+        ) = com.khanabook.lite.pos.domain.manager.InventoryConsumptionManager(
+                recipeRepository,
+                batchRepository
+        )
 
         @Provides
         @Singleton

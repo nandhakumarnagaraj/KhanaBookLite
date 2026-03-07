@@ -215,13 +215,13 @@ fun TableHeader() {
             .padding(vertical = 12.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        HeaderCell("Daily\nOrder No", 1f)
-        HeaderCell("Lifetime\nOrder No", 1.2f)
+        HeaderCell("D.No", 1f)
+        HeaderCell("L.No", 1.2f)
         HeaderCell("Current\nStatus", 1.5f)
-        HeaderCell("Sales\nAmount", 1.3f)
-        HeaderCell("Pay Mode", 1.2f)
-        HeaderCell("Order\nStatus âœ•", 1.5f)
-        HeaderCell("Sales\nDate", 1.5f)
+        HeaderCell("Amount", 1.3f)
+        HeaderCell("Mode", 1.2f)
+        HeaderCell("Status", 1.5f)
+        HeaderCell("Date", 1.5f)
     }
 }
 
@@ -315,9 +315,9 @@ fun OrderTableRow(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (row.orderStatus == OrderStatus.COMPLETED) "Order\nCompletion" else "Order\nCancelled",
+                        text = if (row.orderStatus == OrderStatus.COMPLETED) "Completion" else "Cancelled",
                         color = Color.White,
-                        fontSize = 9.sp,
+                        fontSize =8.sp,
                         textAlign = TextAlign.Center,
                         lineHeight = 10.sp
                     )
@@ -330,14 +330,14 @@ fun OrderTableRow(
                 modifier = Modifier.background(ParchmentBG)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Order Completion", color = DarkBrown1, fontSize = 12.sp) },
+                    text = { Text("Completion", color = DarkBrown1, fontSize = 12.sp) },
                     onClick = {
                         onStatusChange(OrderStatus.COMPLETED.dbValue)
                         statusExpanded = false
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Order Cancelled", color = DarkBrown1, fontSize = 12.sp) },
+                    text = { Text("Cancelled", color = DarkBrown1, fontSize = 12.sp) },
                     onClick = {
                         onStatusChange(OrderStatus.CANCELLED.dbValue)
                         statusExpanded = false

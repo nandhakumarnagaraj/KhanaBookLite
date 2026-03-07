@@ -54,8 +54,14 @@ class MainActivity : ComponentActivity() {
                     composable("splash") {
                         SplashScreen(
                                 onTimeout = {
-                                    navController.navigate("login") {
-                                        popUpTo("splash") { inclusive = true }
+                                    if (currentUser != null) {
+                                        navController.navigate("main/0") {
+                                            popUpTo("splash") { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.navigate("login") {
+                                            popUpTo("splash") { inclusive = true }
+                                        }
                                     }
                                 }
                         )

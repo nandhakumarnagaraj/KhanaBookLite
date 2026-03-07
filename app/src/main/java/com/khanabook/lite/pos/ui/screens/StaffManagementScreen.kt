@@ -1,4 +1,4 @@
-﻿package com.khanabook.lite.pos.ui.screens
+package com.khanabook.lite.pos.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,9 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.ViewSidebar
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,38 +33,167 @@ fun StaffManagementScreen(
 ) {
     val users by viewModel.allUsers.collectAsState(initial = emptyList())
     var showAddDialog by remember { mutableStateOf(false) }
+    var showSidebar by remember { mutableStateOf(true) }
+    var selectedUser by remember { mutableStateOf<UserEntity?>(null) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(DarkBrown1, Color.Black)))
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Main Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = PrimaryGold)
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = PrimaryGold,
+                contentColor = DarkBrown1,
+                icon = { Icon(Icons.Default.Add, null) },
+                text = { Text("Add Staff", fontWeight = FontWeight.Bold) },
+                shape = RoundedCornerShape(12.dp)
+            )
+        },
+        containerColor = DarkBrown1
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Brush.verticalGradient(listOf(DarkBrown1, DarkBrown2)))
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = PrimaryGold)
+                    }
+                    Text(
+                        text = "Staff Management",
+                        modifier = Modifier.weight(1f),
+                        color = PrimaryGold,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    IconButton(onClick = { showSidebar = !showSidebar }) {
+                        Icon(
+                            if (showSidebar) Icons.Default.Fullscreen else Icons.AutoMirrored.Filled.ViewSidebar, 
+                            contentDescription = "Toggle Sidebar", 
+                            tint = PrimaryGold
+                        )
+                    }
                 }
-                Text("Manage Staff", color = PrimaryGold, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { showAddDialog = true }) {
-                    Icon(Icons.Default.Add, null, tint = PrimaryGold, modifier = Modifier.size(28.dp))
-                }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // Staff List (Left Column) - Conditional
+                    if (showSidebar) {
+                        Column(
+                            modifier = Modifier
+                                .weight(0.4f)
+                                .fillMaxHeight()
+                                .background(Color.Black.copy(alpha = 0.1f))
+                        ) {
+                            Text(
+                                "Staff Members",
+                                color = PrimaryGold,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                            HorizontalDivider(color = BorderGold.copy(alpha = 0.2f))
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(users) { user ->
-                    StaffUserCard(user, onDelete = { viewModel.deleteUser(user) })
+                            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                items(users) { user ->
+                                    Surface(
+                                        onClick = { selectedUser = user },
+                                        color = if (selectedUser?.id == user.id) PrimaryGold.copy(alpha = 0.15f) else Color.Transparent,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(modifier = Modifier.padding(16.dp)) {
+                                            Text(
+                                                user.name,
+                                                color = if (selectedUser?.id == user.id) PrimaryGold else TextLight,
+                                                fontSize = 14.sp,
+                                                fontWeight = if (selectedUser?.id == user.id) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                            Text(
+                                                user.role.uppercase(),
+                                                color = if (selectedUser?.id == user.id) TextGold else TextGold.copy(alpha = 0.6f),
+                                                fontSize = 11.sp
+                                            )
+                                        }
+                                    }
+                                    HorizontalDivider(color = BorderGold.copy(alpha = 0.1f), thickness = 0.5.dp)
+                                }
+                            }
+                        }
+
+                        // Vertical Divider
+                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(BorderGold.copy(alpha = 0.2f)))
+                    }
+
+                    // Details View (Right Column)
+                    Column(modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp)) {
+                        if (selectedUser != null) {
+                            val user = selectedUser!!
+                            Column {
+                                Text(
+                                    "Staff Details",
+                                    color = TextGold,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    user.name,
+                                    color = PrimaryGold,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                HorizontalDivider(color = BorderGold.copy(alpha = 0.2f))
+                                Spacer(modifier = Modifier.height(24.dp))
+                                
+                                DetailItem("Phone", user.whatsappNumber ?: user.email)
+                                DetailItem("Role", user.role.uppercase())
+                                DetailItem("Status", if (user.isActive) "Active" else "Inactive")
+                                DetailItem("Joined", user.createdAt.split(" ")[0])
+                                
+                                Spacer(modifier = Modifier.weight(1f))
+                                
+                                if (user.role != "admin") {
+                                    Button(
+                                        onClick = { 
+                                            viewModel.deleteUser(user)
+                                            selectedUser = null
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(containerColor = DangerRed.copy(alpha = 0.1f), contentColor = DangerRed),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, DangerRed)
+                                    ) {
+                                        Icon(Icons.Default.Delete, null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Remove Staff Member")
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(Icons.Default.Badge, null, tint = TextGold.copy(alpha = 0.3f), modifier = Modifier.size(64.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "Select a staff member from the ${if(showSidebar) "left" else "sidebar"}\nto view details or manage access", 
+                                        color = TextGold, 
+                                        textAlign = TextAlign.Center,
+                                        lineHeight = 20.sp
+                                    )
+                                    if (!showSidebar) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Button(onClick = { showSidebar = true }, colors = ButtonDefaults.buttonColors(containerColor = PrimaryGold)) {
+                                            Text("Show Staff List", color = DarkBrown1)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -82,54 +211,13 @@ fun StaffManagementScreen(
 }
 
 @Composable
-fun StaffUserCard(user: UserEntity, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = CardBG),
-        shape = RoundedCornerShape(12.dp)
+fun DetailItem(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(24.dp),
-                color = PrimaryGold.copy(alpha = 0.15f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Person,
-                        null,
-                        tint = PrimaryGold,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = user.name,
-                    color = TextLight,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "Role: ${user.role.uppercase()} | ${user.whatsappNumber ?: user.email}",
-                    color = TextGold,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            
-            if (user.role != "admin") {
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, null, tint = DangerRed.copy(alpha = 0.8f))
-                }
-            }
-        }
+        Text(label, color = TextGold, fontSize = 14.sp)
+        Text(value, color = TextLight, fontSize = 14.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -197,4 +285,3 @@ fun AddStaffDialog(onDismiss: () -> Unit, onConfirm: (String, String, String, St
         containerColor = DarkBrown2
     )
 }
-

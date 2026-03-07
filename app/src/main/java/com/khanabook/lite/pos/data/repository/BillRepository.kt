@@ -1,13 +1,17 @@
-﻿package com.khanabook.lite.pos.data.repository
+package com.khanabook.lite.pos.data.repository
 
 import com.khanabook.lite.pos.data.local.dao.BillDao
 import com.khanabook.lite.pos.data.local.entity.BillEntity
 import com.khanabook.lite.pos.data.local.entity.BillItemEntity
 import com.khanabook.lite.pos.data.local.entity.BillPaymentEntity
 import com.khanabook.lite.pos.data.local.relation.BillWithItems
+import com.khanabook.lite.pos.domain.manager.InventoryConsumptionManager
 import kotlinx.coroutines.flow.Flow
 
-class BillRepository(private val billDao: BillDao) {
+class BillRepository(
+    private val billDao: BillDao,
+    private val inventoryConsumptionManager: InventoryConsumptionManager? = null
+) {
 
     suspend fun insertFullBill(bill: BillEntity, items: List<BillItemEntity>, payments: List<BillPaymentEntity>) {
         billDao.insertFullBill(bill, items, payments)
@@ -39,6 +43,12 @@ class BillRepository(private val billDao: BillDao) {
 
     suspend fun updateOrderStatus(id: Int, status: String) {
         billDao.updateOrderStatus(id, status)
+        if (status.equals("completed", ignoreCase = true) || status.equals("paid", ignoreCase = true)) {
+            val billWithItems = billDao.getBillWithItemsById(id)
+            billWithItems?.let {
+                inventoryConsumptionManager?.consumeMaterialsForBill(it.items)
+            }
+        }
     }
 
     suspend fun updatePaymentMode(id: Int, mode: String) {
@@ -53,5 +63,3 @@ class BillRepository(private val billDao: BillDao) {
         return billDao.getBillsByDateRange(startDate, endDate)
     }
 }
-
-

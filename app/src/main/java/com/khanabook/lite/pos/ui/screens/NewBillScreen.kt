@@ -873,68 +873,7 @@ fun SuccessStep(
         Spacer(modifier = Modifier.height(32.dp))
         Button(
                 onClick = {
-                    try {
-                        lastBill?.let { billWithItems ->
-                            val text =
-                                    com.khanabook.lite.pos.domain.util.InvoiceFormatter
-                                            .formatForWhatsApp(billWithItems, profile)
-
-                            val phone = billWithItems.bill.customerWhatsapp
-                            if (phone.isNullOrBlank()) {
-                                // Fallback to generic share if no phone provided
-                                val intent =
-                                        android.content.Intent(android.content.Intent.ACTION_SEND)
-                                                .apply {
-                                                    type = "text/plain"
-                                                    putExtra(android.content.Intent.EXTRA_TEXT, text)
-                                                }
-                                context.startActivity(
-                                        android.content.Intent.createChooser(intent, "Share Invoice")
-                                )
-                            } else {
-                                // Target specific WhatsApp chat
-                                val formattedPhone =
-                                        if (phone.length == 10) "91$phone" else phone
-                                val url =
-                                        "https://api.whatsapp.com/send?phone=$formattedPhone&text=${android.net.Uri.encode(text)}"
-                                val intent =
-                                        android.content.Intent(android.content.Intent.ACTION_VIEW)
-                                                .apply {
-                                                    data = android.net.Uri.parse(url)
-                                                    `package` = "com.whatsapp"
-                                                }
-                                try {
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    // WhatsApp not installed, fallback to generic
-                                    val fallbackIntent =
-                                            android.content.Intent(
-                                                            android.content.Intent.ACTION_SEND
-                                                    )
-                                                    .apply {
-                                                        type = "text/plain"
-                                                        putExtra(
-                                                                android.content.Intent.EXTRA_TEXT,
-                                                                text
-                                                        )
-                                                    }
-                                    context.startActivity(
-                                            android.content.Intent.createChooser(
-                                                    fallbackIntent,
-                                                    "Share Invoice"
-                                            )
-                                    )
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        android.widget.Toast.makeText(
-                                        context,
-                                        "Error sharing invoice: ${e.message}",
-                                        android.widget.Toast.LENGTH_SHORT
-                                )
-                                .show()
-                    }
+                    lastBill?.let { shareBillAsPdf(context, it, profile) }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
@@ -943,52 +882,17 @@ fun SuccessStep(
         ) {
             Icon(Icons.Default.Share, null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Share on WhatsApp Chat", color = Color.White)
+            Text("Share PDF on WhatsApp", color = Color.White)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
                 onClick = {
-                    try {
-                        lastBill?.let { billWithItems ->
-                            val pdfGenerator =
-                                    com.khanabook.lite.pos.domain.manager.InvoicePDFGenerator(
-                                            context
-                                    )
-                            val pdfFile = pdfGenerator.generatePDF(billWithItems, profile)
-                            val pdfUri =
-                                    androidx.core.content.FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.provider",
-                                            pdfFile
-                                    )
-                            val intent =
-                                    android.content.Intent(android.content.Intent.ACTION_VIEW)
-                                            .apply {
-                                                setDataAndType(pdfUri, "application/pdf")
-                                                addFlags(
-                                                        android.content.Intent
-                                                                .FLAG_GRANT_READ_URI_PERMISSION
-                                                )
-                                            }
-                            context.startActivity(
-                                    android.content.Intent.createChooser(
-                                            intent,
-                                            "Open PDF to Print"
-                                    )
-                            )
-                        }
-                    } catch (e: Exception) {
-                        android.widget.Toast.makeText(
-                                        context,
-                                        "Error opening printer: ${e.message}",
-                                        android.widget.Toast.LENGTH_SHORT
-                                )
-                                .show()
-                    }
+                    lastBill?.let { openBillToPrint(context, it, profile) }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryGold),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                enabled = lastBill != null
         ) {
             Icon(Icons.Default.Print, null, tint = DarkBrown1)
             Spacer(modifier = Modifier.width(8.dp))

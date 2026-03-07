@@ -1,4 +1,4 @@
-﻿package com.khanabook.lite.pos.ui.screens
+package com.khanabook.lite.pos.ui.screens
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -66,7 +66,7 @@ fun SettingsScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Unified Header
-            if (section != "menu_config" && section != "staff_mgmt") {
+            if (section != "menu_config" && section != "staff_mgmt" && section != "recipe" && section != "batch") {
                 Row(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -89,6 +89,8 @@ fun SettingsScreen(
                                         "tax" -> "Tax Configuration"
                                         "preview" -> "Invoice Preview"
                                         "backup" -> "Data Backup"
+                                        "recipe" -> "Recipe & BOM Editor"
+                                        "batch" -> "Batch & Expiry"
                                         "menu" -> "Settings"
                                         else -> "Settings"
                                     },
@@ -132,11 +134,14 @@ fun SettingsScreen(
                             SettingsItem(icon = Icons.Filled.Settings, text = "Tax Configuration") {
                                 section = "tax"
                             }
-                            SettingsItem(icon = Icons.Filled.Visibility, text = "Preview Invoice") {
-                                section = "preview"
-                            }
                             SettingsItem(icon = Icons.Filled.Backup, text = "Data Backup") {
                                 section = "backup"
+                            }
+                            SettingsItem(icon = Icons.Filled.MenuBook, text = "Recipe & BOM Editor") {
+                                section = "recipe"
+                            }
+                            SettingsItem(icon = Icons.Filled.DateRange, text = "Batch & Expiry Management") {
+                                section = "batch"
                             }
                             SettingsItem(icon = Icons.Filled.People, text = "Manage Staff") {
                                 section = "staff_mgmt"
@@ -281,17 +286,6 @@ fun SettingsScreen(
                             Spacer(modifier = Modifier.height(32.dp))
                         }
                     }
-                    "preview" -> {
-                        Column(
-                                modifier =
-                                        Modifier.fillMaxSize()
-                                                .padding(horizontal = 16.dp)
-                                                .verticalScroll(rememberScrollState())
-                        ) {
-                            PreviewInvoiceView(profile = profile, onBack = { section = "menu" })
-                            Spacer(modifier = Modifier.height(32.dp))
-                        }
-                    }
                     "backup" -> {
                         Column(
                                 modifier =
@@ -302,6 +296,12 @@ fun SettingsScreen(
                             BackupConfigView(viewModel = viewModel, onBack = { section = "menu" })
                             Spacer(modifier = Modifier.height(32.dp))
                         }
+                    }
+                    "recipe" -> {
+                        RecipeEditorScreen(onBack = { section = "menu" })
+                    }
+                    "batch" -> {
+                        BatchManagementScreen(onBack = { section = "menu" })
                     }
                     "staff_mgmt" -> {
                         StaffManagementScreen(onBack = { section = "menu" })
@@ -405,233 +405,6 @@ fun BackupConfigView(viewModel: SettingsViewModel, onBack: () -> Unit) {
 }
 
 @Composable
-fun PreviewInvoiceView(profile: RestaurantProfileEntity?, onBack: () -> Unit) {
-    var previewPaperSize by remember { mutableStateOf(profile?.paperSize ?: "58mm") }
-    var simulateGst by remember { mutableStateOf(profile?.gstEnabled ?: false) }
-
-    ConfigCard {
-        Text("Preview Options", color = TextLight, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Paper Size", color = TextGold, fontSize = 14.sp)
-            Row {
-                FilterChip(
-                        selected = previewPaperSize == "58mm",
-                        onClick = { previewPaperSize = "58mm" },
-                        label = { Text("58mm") }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                FilterChip(
-                        selected = previewPaperSize == "80mm",
-                        onClick = { previewPaperSize = "80mm" },
-                        label = { Text("80mm") }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Simulate GST", color = TextGold, fontSize = 14.sp)
-            Switch(
-                    checked = simulateGst,
-                    onCheckedChange = { simulateGst = it },
-                    colors = SwitchDefaults.colors(checkedTrackColor = Color(0xFF4CAF50))
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-        OutlinedButton(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth().height(44.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, TextGold),
-                shape = RoundedCornerShape(22.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextGold)
-        ) { Text("CLOSE PREVIEW") }
-    }
-
-    val previewWidth = if (previewPaperSize == "80mm") 300.dp else 220.dp
-    Box(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
-    ) {
-        Card(
-                modifier = Modifier.width(previewWidth),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(4.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                        profile?.shopName?.uppercase() ?: "RESTAURANT",
-                        color = Color.Black,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = if (previewPaperSize == "80mm") 16.sp else 13.sp
-                )
-                Text(
-                        profile?.shopAddress?.take(30) ?: "Address Line",
-                        color = Color.Gray,
-                        fontSize = 9.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
-                Text(
-                        if (simulateGst) "TAX INVOICE" else "INVOICE",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                )
-                HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
-                Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Bill: #00001", color = Color.Black, fontSize = 8.sp)
-                    Text("28-Feb-2026", color = Color.Black, fontSize = 8.sp)
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                HorizontalDivider(color = Color.Black, thickness = 0.5.dp)
-                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                    Text(
-                            "ITEM",
-                            modifier = Modifier.weight(1f),
-                            color = Color.Black,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                            "QTY",
-                            modifier = Modifier.width(25.dp),
-                            color = Color.Black,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                            "AMT",
-                            modifier = Modifier.width(40.dp),
-                            color = Color.Black,
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Right
-                    )
-                }
-                HorizontalDivider(color = Color.Black, thickness = 0.5.dp)
-
-                MockInvoiceItem("CHICKEN BIRYANI", 1, 320.0)
-                MockInvoiceItem("LIME SODA", 2, 140.0)
-
-                Spacer(modifier = Modifier.height(4.dp))
-                HorizontalDivider(color = Color.LightGray, thickness = 0.5.dp)
-
-                val subtotal = 460.0
-                val currency = if (profile?.currency == "INR") "₹" else profile?.currency ?: ""
-
-                InvoiceSummaryRow(
-                        "Subtotal",
-                        "$currency ${"%.2f".format(subtotal)}",
-                        previewPaperSize
-                )
-                if (simulateGst) {
-                    val gstPct = profile?.gstPercentage ?: 5.0
-                    val totalGst = (subtotal * gstPct) / 100
-                    InvoiceSummaryRow(
-                            "GST ($gstPct%)",
-                            "$currency ${"%.2f".format(totalGst)}",
-                            previewPaperSize
-                    )
-                }
-
-                HorizontalDivider(
-                        color = Color.Black,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                )
-                Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                            "NET AMOUNT",
-                            color = Color.Black,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 11.sp
-                    )
-                    val total =
-                            if (simulateGst)
-                                    subtotal + (subtotal * (profile?.gstPercentage ?: 5.0) / 100)
-                            else subtotal
-                    Text(
-                            "$currency ${"%.2f".format(total)}",
-                            color = Color.Black,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 11.sp
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                        "VISIT AGAIN",
-                        color = Color.Black,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun MockInvoiceItem(name: String, qty: Int, total: Double) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)) {
-        Text(name, modifier = Modifier.weight(1f), color = Color.Black, fontSize = 8.sp)
-        Text(qty.toString(), modifier = Modifier.width(25.dp), color = Color.Black, fontSize = 8.sp)
-        Text(
-                "%.2f".format(total),
-                modifier = Modifier.width(40.dp),
-                color = Color.Black,
-                fontSize = 8.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Right
-        )
-    }
-}
-
-@Composable
-fun InvoiceSummaryRow(label: String, value: String, previewSize: String) {
-    Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-                label,
-                color = Color.Black,
-                fontSize = 8.sp,
-                modifier = Modifier.width(if (previewSize == "80mm") 80.dp else 60.dp)
-        )
-        Text(
-                value,
-                color = Color.Black,
-                fontSize = 8.sp,
-                modifier = Modifier.width(50.dp),
-                fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Right
-        )
-    }
-}
-
-@Composable
 private fun ShopConfigView(
         profile: RestaurantProfileEntity?,
         viewModel: SettingsViewModel,
@@ -689,7 +462,7 @@ private fun ShopConfigView(
         Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+            ) {
             Box(
                     modifier =
                             Modifier.size(100.dp)
@@ -1511,6 +1284,7 @@ private fun PrinterConfigView(
                             Icon(
                                     Icons.Default.BluetoothSearching,
                                     null,
+
                                     tint = PrimaryGold.copy(alpha = 0.5f),
                                     modifier = Modifier.size(48.dp)
                             )
@@ -1862,4 +1636,3 @@ private fun loadBitmap(path: String): Bitmap? {
         null
     }
 }
-

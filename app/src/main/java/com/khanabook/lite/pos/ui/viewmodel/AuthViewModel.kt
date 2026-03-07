@@ -42,6 +42,12 @@ constructor(
         private val restaurantRepository: RestaurantRepository
 ) : ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            userRepository.loadPersistedUser()
+        }
+    }
+
     val currentUser: StateFlow<UserEntity?> = userRepository.currentUser
 
     private val _loginStatus = MutableStateFlow<LoginResult?>(null)

@@ -20,9 +20,13 @@ import com.khanabook.lite.pos.data.local.entity.*
         BillEntity::class,
         BillItemEntity::class,
         BillPaymentEntity::class,
-        StockLogEntity::class
+        StockLogEntity::class,
+        RawMaterialEntity::class,
+        RawMaterialStockLogEntity::class,
+        RecipeIngredientEntity::class,
+        MaterialBatchEntity::class
     ],
-    version = 11,
+    version = 13,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -32,9 +36,71 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun menuDao(): MenuDao
     abstract fun billDao(): BillDao
     abstract fun inventoryDao(): InventoryDao
+    abstract fun rawMaterialDao(): RawMaterialDao
+    abstract fun recipeDao(): RecipeDao
+    abstract fun batchDao(): BatchDao
 
     companion object {
         const val DATABASE_NAME = "khanabook_lite_db"
+
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `recipe_ingredients` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                        `menu_item_id` INTEGER NOT NULL, 
+                        `raw_material_id` INTEGER NOT NULL, 
+                        `quantity_needed` REAL NOT NULL, 
+                        FOREIGN KEY(`menu_item_id`) REFERENCES `menu_items`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, 
+                        FOREIGN KEY(`raw_material_id`) REFERENCES `raw_materials`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_recipe_ingredients_menu_item_id` ON `recipe_ingredients` (`menu_item_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_recipe_ingredients_raw_material_id` ON `recipe_ingredients` (`raw_material_id`)")
+                
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `material_batches` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                        `raw_material_id` INTEGER NOT NULL, 
+                        `quantity` REAL NOT NULL, 
+                        `initial_quantity` REAL NOT NULL, 
+                        `expiry_date` TEXT NOT NULL, 
+                        `received_date` TEXT NOT NULL, 
+                        `batch_number` TEXT, 
+                        `is_depleted` INTEGER NOT NULL DEFAULT 0, 
+                        FOREIGN KEY(`raw_material_id`) REFERENCES `raw_materials`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_material_batches_raw_material_id` ON `material_batches` (`raw_material_id`)")
+            }
+        }
+
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `raw_materials` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                        `name` TEXT NOT NULL, 
+                        `unit` TEXT NOT NULL, 
+                        `current_stock` REAL NOT NULL DEFAULT 0.0, 
+                        `low_stock_threshold` REAL NOT NULL DEFAULT 5.0, 
+                        `last_updated` TEXT NOT NULL
+                    )
+                """.trimIndent())
+                
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `raw_material_stock_logs` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                        `raw_material_id` INTEGER NOT NULL, 
+                        `delta` REAL NOT NULL, 
+                        `reason` TEXT NOT NULL, 
+                        `created_at` TEXT NOT NULL, 
+                        FOREIGN KEY(`raw_material_id`) REFERENCES `raw_materials`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_raw_material_stock_logs_raw_material_id` ON `raw_material_stock_logs` (`raw_material_id`)")
+            }
+        }
 
         val MIGRATION_10_11 = object : Migration(10, 11) {
             override fun migrate(db: SupportSQLiteDatabase) {

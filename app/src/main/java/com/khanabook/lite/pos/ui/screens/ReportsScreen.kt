@@ -399,10 +399,11 @@ fun OrderLevelView(rows: List<com.khanabook.lite.pos.domain.model.OrderLevelRow>
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            HeaderCell("Daily ID", Modifier.weight(1f))
-            HeaderCell("Lifetime ID", Modifier.weight(1.2f))
-            HeaderCell("Payment Mode (View)", Modifier.weight(3.3f))
-            HeaderCell("Date", Modifier.weight(1.2f))
+            HeaderCell("D.ID", Modifier.weight(0.8f))
+            HeaderCell("L.ID", Modifier.weight(1f))
+            HeaderCell("Mode", Modifier.weight(2.3f))
+            HeaderCell("Action", Modifier.weight(1.2f))
+            HeaderCell("Date", Modifier.weight(1.4f))
         }
 
         LazyColumn(
@@ -446,48 +447,48 @@ fun OrderRowItem(row: com.khanabook.lite.pos.domain.model.OrderLevelRow, onViewD
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(row.dailyId, color = TextLight, fontSize = 13.sp, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-            Text(row.lifetimeId.toString(), color = TextLight, fontSize = 13.sp, modifier = Modifier.weight(1.2f), textAlign = TextAlign.Center)
+            Text(row.dailyId, color = TextLight, fontSize = 13.sp, modifier = Modifier.weight(0.8f), textAlign = TextAlign.Center)
+            Text(row.lifetimeId.toString(), color = TextLight, fontSize = 13.sp, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             
-            Box(modifier = Modifier.weight(3.3f), contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val (color, label) = when (row.paymentMode) {
-                        PaymentMode.ZOMATO -> Color(0xFFB71C1C) to "Zomato"
-                        PaymentMode.SWIGGY -> Color(0xFFE65100) to "Swiggy"
-                        PaymentMode.CASH -> Color(0xFF4E342E) to "Cash"
-                        PaymentMode.UPI -> Color(0xFF4527A0) to "UPI"
-                        PaymentMode.PART_CASH_UPI -> Color(0xFF1B5E20) to "Part Payment\n(Cash+UPI)"
-                        else -> Color(0xFF37474F) to row.paymentMode.displayLabel
-                    }
-                    Surface(
-                        color = color,
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Text(
-                            label,
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                            lineHeight = 10.sp
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
-                    Surface(
-                        color = Color.Transparent,
-                        border = BorderStroke(1.dp, PrimaryGold),
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.clickable { onViewDetails(row.billId) }
-                    ) {
-                        Text(
-                            "View",
-                            color = TextLight,
-                            fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-                        )
-                    }
+            // Mode column
+            Box(modifier = Modifier.weight(2.3f), contentAlignment = Alignment.Center) {
+                val (color, label) = when (row.paymentMode) {
+                    PaymentMode.ZOMATO -> Color(0xFFB71C1C) to "Zomato"
+                    PaymentMode.SWIGGY -> Color(0xFFE65100) to "Swiggy"
+                    PaymentMode.CASH -> Color(0xFF4E342E) to "Cash"
+                    PaymentMode.UPI -> Color(0xFF4527A0) to "UPI"
+                    PaymentMode.PART_CASH_UPI -> Color(0xFF1B5E20) to "Part-Payment\n(Cash+UPI)"
+                    else -> Color(0xFF37474F) to row.paymentMode.displayLabel
+                }
+                Surface(
+                    color = color,
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        label,
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        lineHeight = 10.sp
+                    )
+                }
+            }
+            
+            // View Action column
+            Box(modifier = Modifier.weight(1.2f), contentAlignment = Alignment.Center) {
+                Surface(
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, PrimaryGold),
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.clickable { onViewDetails(row.billId) }
+                ) {
+                    Text(
+                        "View",
+                        color = TextLight,
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                    )
                 }
             }
             
@@ -495,7 +496,7 @@ fun OrderRowItem(row: com.khanabook.lite.pos.domain.model.OrderLevelRow, onViewD
                 formatDate(row.date),
                 color = TextLight,
                 fontSize = 11.sp,
-                modifier = Modifier.weight(1.2f),
+                modifier = Modifier.weight(1.4f),
                 textAlign = TextAlign.Center
             )
         }

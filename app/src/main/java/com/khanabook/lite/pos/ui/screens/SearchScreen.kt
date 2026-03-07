@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.khanabook.lite.pos.ui.theme.*
 import com.khanabook.lite.pos.ui.viewmodel.SearchViewModel
-import com.khanabook.lite.pos.domain.util.InvoiceFormatter
+import com.khanabook.lite.pos.domain.util.*
 import com.khanabook.lite.pos.ui.components.KhanaDatePickerField
 import com.khanabook.lite.pos.ui.viewmodel.SettingsViewModel
 
@@ -243,25 +243,7 @@ fun SearchScreen(
                              Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                  Button(
                                      onClick = {
-                                         result?.let { billWithItems ->
-                                             val pdfGenerator = com.khanabook.lite.pos.domain.manager.InvoicePDFGenerator(context)
-                                             val pdfFile = pdfGenerator.generatePDF(billWithItems, profile)
-                                             val pdfUri = androidx.core.content.FileProvider.getUriForFile(
-                                                 context,
-                                                 "${context.packageName}.provider",
-                                                 pdfFile
-                                             )
-                                             
-                                             val text = InvoiceFormatter.formatForWhatsApp(billWithItems, profile)
-                                             
-                                             val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                                 type = "application/pdf"
-                                                 putExtra(android.content.Intent.EXTRA_STREAM, pdfUri)
-                                                 putExtra(android.content.Intent.EXTRA_TEXT, text)
-                                                 addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                             }
-                                             context.startActivity(android.content.Intent.createChooser(intent, "Share Invoice PDF"))
-                                         }
+                                         result?.let { shareBillAsPdf(context, it, profile) }
                                      },
                                      modifier = Modifier.weight(1f).height(40.dp),
                                      colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
@@ -273,20 +255,7 @@ fun SearchScreen(
                                  }
                                  OutlinedButton(
                                      onClick = { 
-                                         result?.let { billWithItems ->
-                                             val pdfGenerator = com.khanabook.lite.pos.domain.manager.InvoicePDFGenerator(context)
-                                             val pdfFile = pdfGenerator.generatePDF(billWithItems, profile)
-                                             val pdfUri = androidx.core.content.FileProvider.getUriForFile(
-                                                 context,
-                                                 "${context.packageName}.provider",
-                                                 pdfFile
-                                             )
-                                             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                                 setDataAndType(pdfUri, "application/pdf")
-                                                 addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                             }
-                                             context.startActivity(android.content.Intent.createChooser(intent, "Open PDF to Print"))
-                                         }
+                                         result?.let { openBillToPrint(context, it, profile) }
                                      },
                                      modifier = Modifier.weight(1f).height(40.dp),
                                      shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
