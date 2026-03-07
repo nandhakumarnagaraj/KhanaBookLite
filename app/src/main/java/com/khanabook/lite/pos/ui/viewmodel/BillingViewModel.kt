@@ -11,6 +11,9 @@ import com.khanabook.lite.pos.data.repository.BillRepository
 import com.khanabook.lite.pos.data.repository.RestaurantRepository
 import com.khanabook.lite.pos.data.repository.MenuRepository
 import com.khanabook.lite.pos.data.repository.InventoryRepository
+import com.khanabook.lite.pos.data.repository.RecipeRepository
+import com.khanabook.lite.pos.data.repository.RawMaterialRepository
+
 import com.khanabook.lite.pos.domain.manager.BillCalculator
 import com.khanabook.lite.pos.domain.manager.OrderIdManager
 import com.khanabook.lite.pos.domain.model.*
@@ -28,6 +31,8 @@ class BillingViewModel @Inject constructor(
     private val menuRepository: MenuRepository,
     private val restaurantRepository: RestaurantRepository,
     private val inventoryRepository: InventoryRepository,
+    private val recipeRepository: RecipeRepository,
+    private val rawMaterialRepository: RawMaterialRepository,
     val printerManager: com.khanabook.lite.pos.domain.manager.BluetoothPrinterManager
 ) : ViewModel() {
 
@@ -70,19 +75,50 @@ class BillingViewModel @Inject constructor(
 
             // Show warning if reaching or below threshold
             val remainingAfterAdd = latestItem.stockQuantity - (currentQuantityInCart + 1)
+            var warningMessage: String? = null
             if (remainingAfterAdd <= latestItem.lowStockThreshold && remainingAfterAdd > 0) {
-                _error.value = "Running out of stock for ${latestItem.name}"
+                warningMessage = "Running out of stock for ${latestItem.name}"
             } else if (remainingAfterAdd == 0) {
-                _error.value = "Reached maximum stock for ${latestItem.name}"
+                warningMessage = "Reached maximum stock for ${latestItem.name}"
             }
 
+            // Raw Material Stock check
+            val ingredients = recipeRepository.getIngredientsOnce(latestItem.id)
+            val cartSimulation = current.toMutableList()
             if (existing != null) {
-                val index = current.indexOf(existing)
-                current[index] = existing.copy(quantity = existing.quantity + 1)
+                val idx = cartSimulation.indexOf(existing)
+                cartSimulation[idx] = existing.copy(quantity = existing.quantity + 1)
             } else {
-                current.add(CartItem(latestItem, variant, 1))
+                cartSimulation.add(CartItem(latestItem, variant, 1))
             }
-            _cartItems.value = current
+
+            for (ingredient in ingredients) {
+                val material = rawMaterialRepository.getRawMaterialById(ingredient.rawMaterialId) ?: continue
+                var totalRequired = 0.0
+                for (cartItem in cartSimulation) {
+                    val itemIngredients = recipeRepository.getIngredientsOnce(cartItem.item.id)
+                    val ing = itemIngredients.find { it.rawMaterialId == material.id }
+                    if (ing != null) {
+                        totalRequired += ing.quantityNeeded * cartItem.quantity
+                    }
+                }
+
+                if (totalRequired > material.currentStock) {
+                    _error.value = "Insufficient raw material: ${material.name}. (Have: ${material.currentStock} ${material.unit})"
+                    return@launch
+                }
+
+                val remainingRawMaterial = material.currentStock - totalRequired
+                if (remainingRawMaterial <= material.lowStockThreshold && remainingRawMaterial > 0.0) {
+                    warningMessage = "Running low on raw material: ${material.name}"
+                } else if (remainingRawMaterial == 0.0) {
+                    warningMessage = "Reached maximum stock for raw material: ${material.name}"
+                }
+            }
+
+            if (warningMessage != null) _error.value = warningMessage
+
+            _cartItems.value = cartSimulation
             updateSummary()
         }
     }
@@ -147,6 +183,30 @@ class BillingViewModel @Inject constructor(
                     if (latestItem == null || latestItem.stockQuantity < cartItem.quantity) {
                         _error.value = "Insufficient stock for ${cartItem.item.name}. Available: ${latestItem?.stockQuantity ?: 0}"
                         return false
+                    }
+                }
+                
+                // Raw material final stock check
+                val checkedMaterials = mutableSetOf<Int>()
+                for (cartItem in _cartItems.value) {
+                    val ingredients = recipeRepository.getIngredientsOnce(cartItem.item.id)
+                    for (ingredient in ingredients) {
+                        if (checkedMaterials.contains(ingredient.rawMaterialId)) continue
+                        checkedMaterials.add(ingredient.rawMaterialId)
+                        
+                        val material = rawMaterialRepository.getRawMaterialById(ingredient.rawMaterialId) ?: continue
+                        var totalRequiredForMaterial = 0.0
+                        for (innerItem in _cartItems.value) {
+                            val innerIngs = recipeRepository.getIngredientsOnce(innerItem.item.id)
+                            val innerIng = innerIngs.find { it.rawMaterialId == material.id }
+                            if (innerIng != null) {
+                                totalRequiredForMaterial += innerIng.quantityNeeded * innerItem.quantity
+                            }
+                        }
+                        if (totalRequiredForMaterial > material.currentStock) {
+                            _error.value = "Insufficient raw material: ${material.name}. (Have: ${material.currentStock} ${material.unit})"
+                            return false
+                        }
                     }
                 }
             }
